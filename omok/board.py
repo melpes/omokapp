@@ -69,7 +69,7 @@ def line_range() -> list:
     for i in np.arange(size - 2, -1, -1):
         yield board.stone_info.T[::-1][0:1 + i, size - (1 + i):size].diagonal()
 
-def print() -> None:
+def board_print() -> None:
     visualized = board.stone_info.copy().astype(str)
     visualized[np.where(visualized == '-1')] = '○'
     visualized[np.where(visualized == '1')] = '●'

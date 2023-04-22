@@ -9,8 +9,6 @@ from pygame.locals import MOUSEBUTTONDOWN
 from random import choice
 import pandas as pd
 
-from omok import execute
-
 # 4/8
 if True:
     # 4/8
@@ -497,5 +495,4 @@ class Ai:
         yield np.array([]), ''
 
 if __name__ == "__main__":
-    execute.main()
-    # main()
+    main()

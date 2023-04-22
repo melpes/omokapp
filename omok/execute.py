@@ -19,7 +19,7 @@ def main():
     pygame.display.set_caption("Omok")
 
     while True:
-        if board.turn == 1:
+        if board.turn == board.BLACK:
             selection = choice(ai.decision())
             board.put_stone(selection)
             board.change_turn()
