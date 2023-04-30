@@ -1,3 +1,4 @@
+from numba import jit
 from . import board, ai
 import numpy as np
 import pandas as pd
@@ -32,9 +33,10 @@ final = pd.DataFrame()
 def decision():
     ai.final = pd.DataFrame()
     full_markers = judgment()
-    # full_markers = cythonfn.judgent()
+    # full_markers = cythonfn.judgment()
     ai.color *= -1
     e_full_markers = judgment()
+    # e_full_markers = cythonfn.judgment()
     ai.color *= -1
     ai.final["my"] = full_markers.stack()
     ai.final["e"] = e_full_markers.stack()
@@ -64,7 +66,7 @@ def decision():
                 
     return result
 
-def print():
+def printf():
     visualized = board.stone_info.copy().astype(str)
     visualized[visualized == '-1'] = '○'
     visualized[visualized == '1'] = '●'
@@ -173,30 +175,24 @@ def judgment() -> pd.DataFrame:
 
 def marking(line) -> pd.DataFrame:
     line = np.concatenate([line, [0]])
-    marker = pd.Series({i:0 for i in range(line.size)})
-    df = {
+    marker = np.zeros(line.size, dtype=np.int8)
+    line_markers = {
         "info" : line,
-        "score level" : marker,
-        "empty level" : marker,
+        "score level" : marker.copy(),
+        "empty level" : marker.copy(),
         "is blocked" : False
     }
-    line_markers = pd.DataFrame(df)
+    
+    color_idx = pd.Series(np.where(line == color)[0], dtype="Int8")
+    for i in (-1, 1):
+        idxs = color_idx.apply(apply1, dir=i, line=line).dropna().astype("Int8")
+        np.add.at(line_markers["score level"], list(idxs), 1)
+        idxs = idxs.apply(apply1, dir=i, line=line).dropna().astype("Int8")
+        np.add.at(line_markers["score level"], list(idxs), 1)
+        line_markers["empty level"][list(idxs)] += 1
+    line_markers = pd.DataFrame(line_markers)
 
-    for i in range(line_markers.shape[0]):
-        if line_markers.loc[i, "info"] == -1 * ai.color:
-            for dir in [-1, 1]:
-                spreading_blocked(line_markers, i, dir)
-
-    stack = 0
-    for i in range(line_markers.shape[0]):
-        if line_markers.loc[i, "info"] == ai.color:
-            stack += 1
-        elif stack != 0:
-            is_blocked = line_markers.loc[i-1, "is blocked"]
-            spreading_level(line_markers, i, stack, is_blocked)
-            stack = 0
-
-    return line_markers.iloc[:-1].copy()
+    return line_markers.iloc[:-1]
 
 def spreading_level(line_markers, i, stack, is_blocked, dir=0, blank_entry=0):
     # turn에 해당하는 칸 앞뒤 두칸씩 score level을 stack만큼 올립니다.
