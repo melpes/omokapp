@@ -1,15 +1,14 @@
-import pygame, sys
+import pygame, sys, time
 from pygame.locals import QUIT
-import numpy as np
-import pandas as pd
 from pygame.math import Vector2
 from pygame.locals import MOUSEBUTTONDOWN
 from random import choice
 
 from . import board, ai
 from .grid import Grid
-from . import screen_size, GRAY, BLACK, WHITE, BROWN, BGREEN, RED
+from . import screen_size, BLACK, WHITE, BROWN, BGREEN, RED
 
+times = []
 def main():
     pygame.init()
     screen = pygame.display.set_mode(screen_size)
@@ -19,6 +18,7 @@ def main():
     pygame.display.set_caption("Omok")
 
     while True:
+        times.append(time.time())
         if board.turn == board.BLACK:
             selection = choice(ai.decision())
             board.put_stone(selection)
@@ -67,3 +67,9 @@ def main():
 
         if board.check_winner() != 0:
             break
+
+        times.append(time.time())
+        if times[1] - times[0] >= 0.5:
+            print(times[1] - times[0])
+
+        times.clear()
